@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Upload Transaction File</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .flash { padding: 1em; margin: 1em 0; border: 1px solid; }
+        .flash.success { border-color: green; background-color: lightgreen; }
+        .flash.error { border-color: red; background-color: lightcoral; }
+    </style>
+</head>
+<body>
+    <h1>Upload Excel File</h1>
+    <p>Please upload the Excel file containing Transactions, Customers, and Products sheets.</p>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <input type="submit" value="Upload">
+    </form>
+</body>
+</html>

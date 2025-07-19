@@ -4,3 +4,4 @@ pandas
 openpyxl
 geopy
 python-dotenv
+pytest
