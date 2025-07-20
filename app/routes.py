@@ -5,6 +5,7 @@ from flask import render_template, request, flash, redirect, url_for, current_ap
 from werkzeug.utils import secure_filename
 from . import db
 from .utils import validate_excel_file
+from .services import process_excel_file
 
 @current_app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -32,8 +33,22 @@ def upload_file():
             # Validate the uploaded file
             is_valid, message = validate_excel_file(filepath)
             if is_valid:
-                flash('File successfully uploaded and validated.', 'success')
-                # Here you would trigger the processing
+                # Process the file
+                success, result = process_excel_file(filepath, filename)
+                if success:
+                    flash('File successfully uploaded, validated, and processed!', 'success')
+                    # Convert DataFrames to dictionaries for template display
+                    template_results = {
+                        'customer_category_totals': result['customer_category_totals'].to_dict('records'),
+                        'top_spenders_by_category': result['top_spenders_by_category'].to_dict('records'),
+                        'customer_rankings': result['customer_rankings'].to_dict('records'),
+                        'address_history': result.get('address_history', {})
+                    }
+                    return render_template('index.html', 
+                                         analysis_results=template_results,
+                                         show_results=True)
+                else:
+                    flash(f'Processing failed: {result}', 'error')
             else:
                 flash(f'Invalid file: {message}', 'error')
             
@@ -49,3 +64,4 @@ def allowed_file(filename):
     extension = filename.rsplit('.', 1)[1].lower()
     allowed_extensions = {'xlsx', 'xls'}  # Allow both .xlsx and .xls
     return extension in allowed_extensions
+

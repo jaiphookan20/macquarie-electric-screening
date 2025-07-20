@@ -9,6 +9,14 @@
         .flash { padding: 1em; margin: 1em 0; border: 1px solid; }
         .flash.success { border-color: green; background-color: lightgreen; }
         .flash.error { border-color: red; background-color: lightcoral; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f0f0f0; }
+        /* Uniform column widths for all tables */
+        .uniform-table th, .uniform-table td { width: 20%; }
+        /* For tables with 4 columns */
+        .uniform-table-4col th, .uniform-table-4col td { width: 25%; }
+        .uniform-table-5col th, .uniform-table-5col td { width: 20%; }
     </style>
 </head>
 <body>
@@ -29,5 +37,115 @@
         <input type="file" name="file" required>
         <input type="submit" value="Upload">
     </form>
+
+    {% if show_results and analysis_results %}
+    <div class="results-section" style="margin-top: 2em; padding: 1em; border: 1px solid #ccc; background-color: #f9f9f9;">
+        <h2>Data Analysis Results</h2>
+        
+        <h3>1. Customer Spending by Category</h3>
+        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 1em;">
+            <table class="uniform-table-4col">
+                <thead>
+                    <tr>
+                        <th>Customer ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in analysis_results.customer_category_totals %}
+                    <tr>
+                        <td>{{ row.customer_id }}</td>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.category }}</td>
+                        <td>${{ "%.2f"|format(row.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Top Spenders by Category</h3>
+        <table class="uniform-table-4col" style="margin-bottom: 1em;">
+            <thead>
+                <tr>
+                    <th>Customer ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in analysis_results.top_spenders_by_category %}
+                <tr>
+                    <td>{{ row.customer_id }}</td>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.category }}</td>
+                    <td>${{ "%.2f"|format(row.amount) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>3. Customer Rankings</h3>
+        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 1em;">
+            <table class="uniform-table-4col">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Customer ID</th>
+                        <th>Name</th>
+                        <th>Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in analysis_results.customer_rankings %}
+                    <tr>
+                        <td>{{ row.rank }}</td>
+                        <td>{{ row.customer_id }}</td>
+                        <td>{{ row.name }}</td>
+                        <td>${{ "%.2f"|format(row.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Address History -->
+        {% if analysis_results.address_history %}
+        <h3>4. Customer Address History</h3>
+        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 1em;">
+            <table class="uniform-table-5col">
+                <thead>
+                    <tr>
+                        <th>Customer ID</th>
+                        <th>Customer Name</th>
+                        <th>Address</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer_id, history in analysis_results.address_history.items() %}
+                        {% for record in history %}
+                        <tr>
+                            <td>{{ customer_id }}</td>
+                            <td>{{ record.name }}</td>
+                            <td>{{ record.address }}</td>
+                            <td>{{ record.start_date }}</td>
+                            <td>{{ record.end_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        
+        <p style="margin-top: 1em; font-style: italic;">Analysis completed successfully! Total customers processed: {{ analysis_results.customer_rankings|length }}</p>
+    </div>
+    {% endif %}
+
 </body>
 </html>
